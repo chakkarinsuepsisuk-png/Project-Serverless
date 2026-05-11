@@ -36,14 +36,6 @@ pipeline {
             }
         }
         
-        stage('Deploy to Kubernetes') {
-            steps {
-                // สั่งรันอัปเดตลง Cluster
-                sh 'kubectl apply -f k8s/deployment.yaml'
-                sh 'kubectl apply -f k8s/service.yaml'
-                // บังคับให้ดึง Image ตัวใหม่ไปรันเสมอ
-                sh 'kubectl rollout restart deployment/it-repair-api'
-            }
-        }
+        
     }
 }
