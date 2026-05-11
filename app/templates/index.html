@@ -1,124 +1,323 @@
 <!DOCTYPE html>
 <html lang="th">
-    <style>
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-        }
-        .card {
-            border: none;
-            border-radius: 15px;
-            transition: transform 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        .btn-primary {
-            background-color: #4e73df;
-            border: none;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-        .table {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        h1 {
-            color: #2e59d9;
-            font-weight: 800;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        .badge {
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-    </style>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT Repair Ticketing System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container py-5">
-        <h1 class="text-center mb-4">🛠️ ระบบแจ้งซ่อมอุปกรณ์ไอทีเบื้องต้น</h1>
-        
-        <div class="row g-4">
-            <div class="col-md-5">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h4 class="card-title mb-3">📝 แจ้งปัญหาใหม่</h4>
-                        <form action="/ticket" method="POST">
-                            <div class="mb-3">
-                                <label class="form-label">ชื่อผู้แจ้ง</label>
-                                <input type="text" name="name" class="form-control" required placeholder="เช่น นายเอ ใจดี">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">อุปกรณ์ที่มีปัญหา</label>
-                                <input type="text" name="device" class="form-control" required placeholder="เช่น โน้ตบุ๊ก, ปริ้นเตอร์">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">รายละเอียดปัญหา</label>
-                                <textarea name="issue" class="form-control" rows="3" required placeholder="เช่น เปิดไม่ติด, ปริ้นไม่ออก"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">ส่งข้อมูลแจ้งซ่อม</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col-md-7">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h4 class="card-title mb-3">📋 รายการแจ้งซ่อมล่าสุด</h4>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>ชื่อ</th>
-                                        <th>อุปกรณ์</th>
-                                        <th>ปัญหา</th>
-                                        <th>สถานะ</th>
-                                        <th>อัปเดต</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for t in tickets %}
-                                    <tr>
-                                        <td>{{ t.id }}</td>
-                                        <td>{{ t.name }}</td>
-                                        <td>{{ t.device }}</td>
-                                        <td>{{ t.issue }}</td>
-                                        <td>
-                                            <span class="badge {% if t.status == 'Pending' %}bg-warning{% elif t.status == 'In Progress' %}bg-info{% else %}bg-success{% endif %}">
-                                                {{ t.status }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <form action="/update_status/{{ t.id }}" method="POST">
-                                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                                                    <option value="Pending" {% if t.status == 'Pending' %}selected{% endif %}>Pending</option>
-                                                    <option value="In Progress" {% if t.status == 'In Progress' %}selected{% endif %}>In Progress</option>
-                                                    <option value="Done" {% if t.status == 'Done' %}selected{% endif %}>Done</option>
-                                                </select>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted py-3">ยังไม่มีข้อมูลแจ้งซ่อม</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        * {
+            font-family: 'Kanit', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transition: 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            color: white;
+            font-weight: 600;
+        }
+
+        label {
+            color: white;
+            font-weight: 400;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 12px;
+            border: none;
+            padding: 12px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.3);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: scale(1.02);
+            opacity: 0.95;
+        }
+
+        .table {
+            overflow: hidden;
+            border-radius: 15px;
+            margin-bottom: 0;
+        }
+
+        .table thead {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        .table tbody tr {
+            background: rgba(255,255,255,0.92);
+            transition: 0.2s;
+        }
+
+        .table tbody tr:hover {
+            background: #f1f5ff;
+        }
+
+        .badge {
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+        }
+
+        .bg-warning {
+            color: black !important;
+        }
+
+        .empty-text {
+            color: #ddd;
+            padding: 20px;
+        }
+
+        .icon-box {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        @media(max-width: 768px) {
+            .main-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container py-5">
+
+    <h1 class="main-title">
+        🛠️ ระบบแจ้งซ่อมอุปกรณ์ไอที
+    </h1>
+
+    <div class="row g-4">
+
+        <!-- FORM -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100">
+
+                <div class="icon-box">
+                    <i class="bi bi-tools"></i>
+                </div>
+
+                <h4 class="card-title mb-4">
+                    แจ้งปัญหาใหม่
+                </h4>
+
+                <form action="/ticket" method="POST">
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            ชื่อผู้แจ้ง
+                        </label>
+
+                        <input type="text"
+                               name="name"
+                               class="form-control"
+                               required
+                               placeholder="เช่น สมชาย ใจดี">
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            อุปกรณ์ที่มีปัญหา
+                        </label>
+
+                        <input type="text"
+                               name="device"
+                               class="form-control"
+                               required
+                               placeholder="เช่น Laptop / Printer">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            รายละเอียดปัญหา
+                        </label>
+
+                        <textarea name="issue"
+                                  class="form-control"
+                                  rows="4"
+                                  required
+                                  placeholder="อธิบายปัญหาที่พบ..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-submit w-100">
+                        <i class="bi bi-send-fill"></i>
+                        ส่งข้อมูลแจ้งซ่อม
+                    </button>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="col-lg-8">
+            <div class="glass-card p-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="card-title mb-0">
+                        📋 รายการแจ้งซ่อมล่าสุด
+                    </h4>
+
+                    <span class="badge bg-light text-dark">
+                        {{ tickets|length }} รายการ
+                    </span>
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle table-hover">
+
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ชื่อ</th>
+                                <th>อุปกรณ์</th>
+                                <th>ปัญหา</th>
+                                <th>สถานะ</th>
+                                <th>อัปเดต</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                        {% for t in tickets %}
+
+                            <tr>
+                                <td>
+                                    <strong>#{{ t.id }}</strong>
+                                </td>
+
+                                <td>{{ t.name }}</td>
+
+                                <td>
+                                    <i class="bi bi-pc-display"></i>
+                                    {{ t.device }}
+                                </td>
+
+                                <td>{{ t.issue }}</td>
+
+                                <td>
+                                    <span class="badge
+                                        {% if t.status == 'Pending' %}
+                                            bg-warning
+                                        {% elif t.status == 'In Progress' %}
+                                            bg-info
+                                        {% else %}
+                                            bg-success
+                                        {% endif %}
+                                    ">
+                                        {{ t.status }}
+                                    </span>
+                                </td>
+
+                                <td style="min-width: 160px;">
+                                    <form action="/update_status/{{ t.id }}" method="POST">
+
+                                        <select name="status"
+                                                class="form-select form-select-sm"
+                                                onchange="this.form.submit()">
+
+                                            <option value="Pending"
+                                                {% if t.status == 'Pending' %}selected{% endif %}>
+                                                Pending
+                                            </option>
+
+                                            <option value="In Progress"
+                                                {% if t.status == 'In Progress' %}selected{% endif %}>
+                                                In Progress
+                                            </option>
+
+                                            <option value="Done"
+                                                {% if t.status == 'Done' %}selected{% endif %}>
+                                                Done
+                                            </option>
+
+                                        </select>
+
+                                    </form>
+                                </td>
+                            </tr>
+
+                        {% else %}
+
+                            <tr>
+                                <td colspan="6" class="text-center empty-text">
+                                    ยังไม่มีข้อมูลแจ้งซ่อม
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
                 </div>
             </div>
         </div>
+
     </div>
+</div>
+
 </body>
 </html>
