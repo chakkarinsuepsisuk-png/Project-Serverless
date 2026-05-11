@@ -7,6 +7,6 @@ spec:
   selector:
     app: it-repair-api
   ports:
-    - port: 5000
+    - port: 80
       targetPort: 5000
       nodePort: 30080
