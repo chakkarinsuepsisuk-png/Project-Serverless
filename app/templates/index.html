@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Repair Ticketing System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-4">🛠️ ระบบแจ้งซ่อมอุปกรณ์ไอทีเบื้องต้น</h1>
+        
+        <div class="row g-4">
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">📝 แจ้งปัญหาใหม่</h4>
+                        <form action="/ticket" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label">ชื่อผู้แจ้ง</label>
+                                <input type="text" name="name" class="form-control" required placeholder="เช่น นายเอ ใจดี">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">อุปกรณ์ที่มีปัญหา</label>
+                                <input type="text" name="device" class="form-control" required placeholder="เช่น โน้ตบุ๊ก, ปริ้นเตอร์">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">รายละเอียดปัญหา</label>
+                                <textarea name="issue" class="form-control" rows="3" required placeholder="เช่น เปิดไม่ติด, ปริ้นไม่ออก"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">ส่งข้อมูลแจ้งซ่อม</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">📋 รายการแจ้งซ่อมล่าสุด</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>ชื่อ</th>
+                                        <th>อุปกรณ์</th>
+                                        <th>ปัญหา</th>
+                                        <th>สถานะ</th>
+                                        <th>อัปเดต</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for t in tickets %}
+                                    <tr>
+                                        <td>{{ t.id }}</td>
+                                        <td>{{ t.name }}</td>
+                                        <td>{{ t.device }}</td>
+                                        <td>{{ t.issue }}</td>
+                                        <td>
+                                            <span class="badge {% if t.status == 'Pending' %}bg-warning{% elif t.status == 'In Progress' %}bg-info{% else %}bg-success{% endif %}">
+                                                {{ t.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <form action="/update_status/{{ t.id }}" method="POST">
+                                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                    <option value="Pending" {% if t.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                                    <option value="In Progress" {% if t.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                                    <option value="Done" {% if t.status == 'Done' %}selected{% endif %}>Done</option>
+                                                </select>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">ยังไม่มีข้อมูลแจ้งซ่อม</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
