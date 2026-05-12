@@ -1,9 +1,12 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from prometheus_flask_exporter import PrometheusMetrics  # <--- 1. เพิ่มบรรทัดนี้
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)  # <--- 2. เพิ่มบรรทัดนี้ (เปิดใช้งาน /metrics อัตโนมัติ)
 
+# ... โค้ดส่วนที่เหลือของเดิมปล่อยไว้เหมือนเดิมได้เลย ...
 # ดึงการตั้งค่าฐานข้อมูลจาก Environment Variable (ถ้าไม่มีจะใช้ค่า Default)
 DB_HOST = os.environ.get("DB_HOST", "localhost")
 DB_USER = os.environ.get("DB_USER", "root")
@@ -58,4 +61,4 @@ def update_status(id):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=False)

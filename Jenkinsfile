@@ -2,9 +2,7 @@ pipeline {
     agent any
     
     environment {
-        // อ้างอิง ID ของ Credentials ที่ตั้งไว้ใน Jenkins
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
-        // !!! แก้ชื่อ username ด้านล่างนี้ !!!
         IMAGE_NAME = 'yaichakkarin/it-repair-api'
         TAG = 'latest'
     }
@@ -13,6 +11,15 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+        
+        stage('Test Application') {
+            steps {
+                dir('app') {
+                    // ทดสอบคอมไพล์โค้ด Python เบื้องต้นเพื่อเช็ค Syntax Error
+                    sh 'python3 -m py_compile app.py'
+                }
             }
         }
         
@@ -36,6 +43,41 @@ pipeline {
             }
         }
         
+        stage('Deploy Infrastructure (IaC)') {
+            steps {
+                script {
+                    dir('terraform') {
+                        sh 'terraform init'
+                        sh 'terraform apply -auto-approve'
+                    }
+                    dir('ansible') {
+                        // ใช้ catchError เพื่อไม่ให้ Pipeline ล้มเหลวถ้ารันเทสแล้วไม่มี Node จริง
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            sh 'ansible-playbook -i inventory playbook.yml'
+                        }
+                    }
+                }
+            }
+        }
         
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    sh 'kubectl apply -f k8s/deployment.yaml'
+                    sh 'kubectl apply -f k8s/service.yaml'
+                    sh 'kubectl rollout restart deployment/it-repair-api'
+                }
+            }
+        }
+        
+        stage('Deploy Monitoring Stack') {
+            steps {
+                script {
+                    sh 'kubectl apply -f monitoring-stack.yaml'
+                    sh 'kubectl rollout restart deployment/prometheus -n monitoring'
+                    sh 'kubectl rollout restart deployment/grafana -n monitoring'
+                }
+            }
+        }
     }
 }

@@ -16,15 +16,15 @@ spec:
     spec:
       containers:
       - name: it-repair-api
-        # !!! แก้ username ด้านล่าง !!!
-        image: yaichakkarin/it-repair-api:latest
-        imagePullPolicy: Always
+        # ใช้ image ที่ build จาก local
+        image: it-repair-api:latest
+        imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 5000
+        - containerPort: 80
         env:
         # !!! แก้ IP ฐานข้อมูลด้านล่าง !!!
         - name: DB_HOST
-          value: "34.126.75.2" 
+          value: "34.158.49.62" 
         - name: DB_USER
           value: "root"
         - name: DB_PASSWORD

@@ -1,8 +1,9 @@
-FROM python:3.9-slim
+# เปลี่ยนจาก slim ธรรมดา เป็น bullseye-slim เพื่อให้ Docker รู้ว่าเป็นตัวใหม่
+FROM --platform=linux/amd64 python:3.9-bullseye
 
 WORKDIR /app
 
-# ติดตั้งแพ็กเกจระบบที่จำเป็นสำหรับการต่อ MySQL
+# ลงตัวต่อ MySQL (Bullseye จะเสถียรกว่าบน Windows)
 RUN apt-get update && apt-get install -y \
     default-libmysqlclient-dev \
     build-essential \
@@ -12,7 +13,5 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-
-EXPOSE 5000
 
 CMD ["python", "app.py"]

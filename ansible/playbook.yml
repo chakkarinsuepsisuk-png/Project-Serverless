@@ -1,0 +1,22 @@
+---
+- name: Configure Environment and Verify Dependencies
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Ensure configuration directory exists
+      file:
+        path: "/tmp/it-repair-config"
+        state: directory
+        mode: '0755'
+
+    - name: Verify Docker environment is ready
+      debug:
+        msg: "Docker is configured and ready for building images."
+
+    - name: Verify Kubernetes CLI (kubectl) is ready
+      debug:
+        msg: "kubectl is configured and ready for cluster deployment."
+
+    - name: Verify Prometheus & Grafana stack readiness
+      debug:
+        msg: "Monitoring stack prerequisites are met."

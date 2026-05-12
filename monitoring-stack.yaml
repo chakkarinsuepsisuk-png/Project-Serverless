@@ -1,0 +1,228 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: v1
+data:
+  prometheus.yml: "global:\n  scrape_interval: 15s\n\nscrape_configs:\n  - job_name:\
+    \ 'it-repair-api'\n    static_configs:\n      - targets: ['it-repair-api-svc.default.svc.cluster.local:80']\n"
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - args:
+        - --config.file=/etc/prometheus/prometheus.yml
+        image: prom/prometheus:latest
+        name: prometheus
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - mountPath: /etc/prometheus
+          name: config-volume
+      volumes:
+      - configMap:
+          name: prometheus-config
+        name: config-volume
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+  namespace: monitoring
+spec:
+  ports:
+  - port: 9090
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    app: prometheus
+---
+apiVersion: v1
+data:
+  datasource.yml: "apiVersion: 1\ndatasources:\n  - name: Prometheus\n    type: prometheus\n\
+    \    access: proxy\n    url: http://prometheus-service.monitoring.svc.cluster.local:9090\n\
+    \    isDefault: false\n    editable: true\n  - name: MySQL\n    type: mysql\n\
+    \    url: 34.158.49.62:3306\n    database: it_repair\n    user: root\n    secureJsonData:\n\
+    \      password: \"SuperSecretPassword123!\"\n    isDefault: true\n    editable:\
+    \ true\n"
+kind: ConfigMap
+metadata:
+  name: grafana-datasource-config
+  namespace: monitoring
+---
+apiVersion: v1
+data:
+  dashboard-provider.yml: "apiVersion: 1\nproviders:\n  - name: 'default'\n    orgId:\
+    \ 1\n    folder: ''\n    type: file\n    disableDeletion: false\n    editable:\
+    \ true\n    options:\n      path: /var/lib/grafana/dashboards\n      foldersFromFilesStructure:\
+    \ false\n"
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider-config
+  namespace: monitoring
+---
+apiVersion: v1
+data:
+  it-repair-dashboard.json: "{\n  \"annotations\": {\n    \"list\": []\n  },\n  \"\
+    editable\": true,\n  \"fiscalYearStartMonth\": 0,\n  \"graphTooltip\": 0,\n  \"\
+    id\": null,\n  \"links\": [],\n  \"liveNow\": false,\n  \"panels\": [\n    {\n\
+    \      \"datasource\": {\n        \"type\": \"mysql\",\n        \"uid\": \"MySQL\"\
+    \n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 8,\n     \
+    \   \"x\": 0,\n        \"y\": 0\n      },\n      \"id\": 1,\n      \"options\"\
+    : {\n        \"orientation\": \"horizontal\",\n        \"showValue\": \"auto\"\
+    ,\n        \"legend\": {\n          \"displayMode\": \"list\",\n          \"placement\"\
+    : \"bottom\",\n          \"showLegend\": false\n        }\n      },\n      \"\
+    targets\": [\n        {\n          \"format\": \"table\",\n          \"group\"\
+    : [],\n          \"metricColumn\": \"none\",\n          \"rawQuery\": true,\n\
+    \          \"rawSql\": \"SELECT name as 'Name', count(*) as 'Total' FROM tickets\
+    \ GROUP BY name ORDER BY Total DESC LIMIT 5\",\n          \"refId\": \"A\",\n\
+    \          \"select\": [\n            [\n              {\n                \"params\"\
+    : [\n                  \"value\"\n                ],\n                \"type\"\
+    : \"column\"\n              }\n            ]\n          ],\n          \"timeColumn\"\
+    : \"time\",\n          \"where\": [\n            {\n              \"name\": \"\
+    $__timeFilter\",\n              \"params\": [],\n              \"type\": \"macro\"\
+    \n            }\n          ]\n        }\n      ],\n      \"title\": \"\U0001F947\
+    \ Top Users (\u0E1C\u0E39\u0E49\u0E41\u0E08\u0E49\u0E07\u0E0B\u0E48\u0E2D\u0E21\
+    \u0E1A\u0E48\u0E2D\u0E22\u0E17\u0E35\u0E48\u0E2A\u0E38\u0E14)\",\n      \"type\"\
+    : \"barchart\",\n      \"fieldConfig\": {\n        \"defaults\": {\n         \
+    \ \"color\": {\n            \"mode\": \"palette-classic\"\n          },\n    \
+    \      \"custom\": {\n            \"fillOpacity\": 80,\n            \"lineWidth\"\
+    : 1\n          }\n        },\n        \"overrides\": []\n      }\n    },\n   \
+    \ {\n      \"datasource\": {\n        \"type\": \"mysql\",\n        \"uid\": \"\
+    MySQL\"\n      },\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 8,\n\
+    \        \"x\": 8,\n        \"y\": 0\n      },\n      \"id\": 2,\n      \"options\"\
+    : {\n        \"pieType\": \"donut\",\n        \"reduceOptions\": {\n         \
+    \ \"values\": true,\n          \"calcs\": [],\n          \"fields\": \"\"\n  \
+    \      },\n        \"displayLabels\": [\n          \"percent\",\n          \"\
+    name\"\n        ],\n        \"legend\": {\n          \"displayMode\": \"table\"\
+    ,\n          \"placement\": \"right\",\n          \"showLegend\": true,\n    \
+    \      \"values\": [\n            \"value\",\n            \"percent\"\n      \
+    \    ]\n        }\n      },\n      \"targets\": [\n        {\n          \"format\"\
+    : \"table\",\n          \"rawQuery\": true,\n          \"rawSql\": \"SELECT device\
+    \ as 'metric', count(*) as 'value' FROM tickets GROUP BY device\",\n         \
+    \ \"refId\": \"A\"\n        }\n      ],\n      \"title\": \"\U0001F4BB Device\
+    \ Types (\u0E2A\u0E31\u0E14\u0E2A\u0E48\u0E27\u0E19\u0E2D\u0E38\u0E1B\u0E01\u0E23\
+    \u0E13\u0E4C\u0E17\u0E35\u0E48\u0E2A\u0E48\u0E07\u0E0B\u0E48\u0E2D\u0E21)\",\n\
+    \      \"type\": \"piechart\",\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"color\": {\n            \"mode\": \"palette-classic\"\n     \
+    \     },\n          \"custom\": {\n            \"hideFrom\": {\n             \
+    \ \"legend\": false,\n              \"tooltip\": false,\n              \"viz\"\
+    : false\n            }\n          }\n        },\n        \"overrides\": []\n \
+    \     }\n    },\n    {\n      \"datasource\": {\n        \"type\": \"mysql\",\n\
+    \        \"uid\": \"MySQL\"\n      },\n      \"gridPos\": {\n        \"h\": 8,\n\
+    \        \"w\": 16,\n        \"x\": 0,\n        \"y\": 8\n      },\n      \"id\"\
+    : 3,\n      \"options\": {\n        \"showHeader\": true,\n        \"sortBy\"\
+    : [\n          {\n            \"desc\": true,\n            \"displayName\": \"\
+    ID\"\n          }\n        ]\n      },\n      \"targets\": [\n        {\n    \
+    \      \"format\": \"table\",\n          \"rawQuery\": true,\n          \"rawSql\"\
+    : \"SELECT id as 'ID', name as 'User', device as 'Device', issue as 'Issue' FROM\
+    \ tickets ORDER BY id DESC LIMIT 5\",\n          \"refId\": \"A\"\n        }\n\
+    \      ],\n      \"title\": \"\U0001F195 Recent Tickets (\u0E23\u0E32\u0E22\u0E01\
+    \u0E32\u0E23\u0E41\u0E08\u0E49\u0E07\u0E0B\u0E48\u0E2D\u0E21\u0E25\u0E48\u0E32\
+    \u0E2A\u0E38\u0E14)\",\n      \"type\": \"table\",\n      \"fieldConfig\": {\n\
+    \        \"defaults\": {\n          \"custom\": {\n            \"align\": \"auto\"\
+    ,\n            \"displayMode\": \"auto\"\n          }\n        },\n        \"\
+    overrides\": []\n      }\n    },\n    {\n      \"datasource\": {\n        \"type\"\
+    : \"mysql\",\n        \"uid\": \"MySQL\"\n      },\n      \"gridPos\": {\n   \
+    \     \"h\": 8,\n        \"w\": 8,\n        \"x\": 16,\n        \"y\": 0\n   \
+    \   },\n      \"id\": 4,\n      \"options\": {\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n    \
+    \    \"orientation\": \"auto\",\n        \"reduceOptions\": {\n          \"calcs\"\
+    : [\n            \"lastNotNull\"\n          ],\n          \"fields\": \"\",\n\
+    \          \"values\": false\n        },\n        \"textMode\": \"auto\"\n   \
+    \   },\n      \"targets\": [\n        {\n          \"format\": \"table\",\n  \
+    \        \"rawQuery\": true,\n          \"rawSql\": \"SELECT count(*) as 'Total\
+    \ Tickets' FROM tickets\",\n          \"refId\": \"A\"\n        }\n      ],\n\
+    \      \"title\": \"\U0001F4C8 Total Tickets (\u0E22\u0E2D\u0E14\u0E23\u0E27\u0E21\
+    \u0E41\u0E08\u0E49\u0E07\u0E0B\u0E48\u0E2D\u0E21)\",\n      \"type\": \"stat\"\
+    ,\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"color\": {\n\
+    \            \"mode\": \"thresholds\"\n          },\n          \"thresholds\"\
+    : {\n            \"mode\": \"absolute\",\n            \"steps\": [\n         \
+    \     {\n                \"color\": \"blue\",\n                \"value\": null\n\
+    \              }\n            ]\n          }\n        },\n        \"overrides\"\
+    : []\n      }\n    }\n  ],\n  \"schemaVersion\": 38,\n  \"style\": \"dark\",\n\
+    \  \"tags\": [\n    \"business\",\n    \"tickets\"\n  ],\n  \"templating\": {\n\
+    \    \"list\": []\n  },\n  \"time\": {\n    \"from\": \"now-6h\",\n    \"to\"\
+    : \"now\"\n  },\n  \"timepicker\": {},\n  \"timezone\": \"\",\n  \"title\": \"\
+    IT Repair Business Dashboard\",\n  \"uid\": \"it-repair-biz\",\n  \"version\"\
+    : 1\n}"
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-json
+  namespace: monitoring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - env:
+        - name: GF_SECURITY_ADMIN_USER
+          value: admin
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: admin
+        image: grafana/grafana:latest
+        name: grafana
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - mountPath: /etc/grafana/provisioning/datasources
+          name: grafana-datasource
+        - mountPath: /etc/grafana/provisioning/dashboards
+          name: grafana-dashboard-provider
+        - mountPath: /var/lib/grafana/dashboards
+          name: grafana-dashboard-json
+      volumes:
+      - configMap:
+          name: grafana-datasource-config
+        name: grafana-datasource
+      - configMap:
+          name: grafana-dashboard-provider-config
+        name: grafana-dashboard-provider
+      - configMap:
+          name: grafana-dashboard-json
+        name: grafana-dashboard-json
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  ports:
+  - nodePort: 30300
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: grafana
+  type: NodePort

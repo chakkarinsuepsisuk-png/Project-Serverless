@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "google" {
-  project = "projectcloud-496006"
+  project = "it-repair-b6643577"
   region  = "asia-southeast1"
 }
 
