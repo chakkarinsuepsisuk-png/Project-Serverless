@@ -69,7 +69,7 @@ pipeline {
                 }
             }
         }
-        
+        //
         stage('Deploy Monitoring Stack') {
             steps {
                 script {
