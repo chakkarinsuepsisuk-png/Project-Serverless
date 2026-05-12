@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
-        IMAGE_NAME = 'yaichakkarin/it-repair-api'
+        IMAGE_NAME = 'phirapong1125/it-repair-api'
         TAG = 'latest'
     }
     
@@ -15,6 +15,12 @@ pipeline {
         }
         
         stage('Test Application') {
+            agent {
+                docker{
+                    image 'python:3.9-slim'
+                    args '-v $WORKSPACE:/home/jenkins/workspace'
+                }
+            }
             steps {
                 dir('app') {
                     // ทดสอบคอมไพล์โค้ด Python เบื้องต้นเพื่อเช็ค Syntax Error
