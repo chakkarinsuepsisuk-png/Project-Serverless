@@ -7,13 +7,12 @@ pipeline {
         TAG = 'latest'
     }
     
-    stages {
+     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
         stage('Test Application') {
             steps {
                 dir('app') {
