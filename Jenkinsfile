@@ -18,7 +18,7 @@ pipeline {
             steps {
                 dir('app') {
                     // ทดสอบคอมไพล์โค้ด Python เบื้องต้นเพื่อเช็ค Syntax Error
-                    sh 'python3 -m py_compile app.py'
+                    sh 'python -m py_compile app.py'
                 }
             }
         }
