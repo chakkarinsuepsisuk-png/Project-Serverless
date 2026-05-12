@@ -13,14 +13,17 @@ pipeline {
             }
         }
         stage('Test Application') {
-            steps {
-                dir('app') {
-                    sh 'python3 -m py_compile app.py'
-                }
-            }
+    agent {
+        docker { image 'python:3.9-slim' } // ใช้ image ที่มี python โดยเฉพาะ
+    }
+    steps {
+        dir('app') {
+            sh 'python3 -m py_compile app.py'
         }
+    }
+}
         
-        
+
         stage('Build Docker Image') {
             steps {
                 dir('app') {
