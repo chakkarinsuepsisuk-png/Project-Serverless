@@ -18,7 +18,6 @@ pipeline {
             agent {
                 docker{
                     image 'python:3.9-slim'
-                    args '-v $WORKSPACE:/home/jenkins/workspace'
                 }
             }
             steps {
