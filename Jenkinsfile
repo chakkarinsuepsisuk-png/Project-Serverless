@@ -15,15 +15,9 @@ pipeline {
         }
         
         stage('Test Application') {
-            agent {
-                docker{
-                    image 'python:3.9-slim'
-                }
-            }
             steps {
                 dir('app') {
-                    // ทดสอบคอมไพล์โค้ด Python เบื้องต้นเพื่อเช็ค Syntax Error
-                    sh 'python -m py_compile app.py'
+                    sh 'python3 -m py_compile app.py'
                 }
             }
         }
