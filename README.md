@@ -1,4 +1,4 @@
-﻿# 🚀 ระบบ API แจ้งซ่อมอุปกรณ์ไอทีเบื้องต้น — ENG23 3074
+# 🚀 ระบบ API แจ้งซ่อมอุปกรณ์ไอทีเบื้องต้น — ENG23 3074
 
 > ระบบ API แจ้งซ่อมอุปกรณ์ไอทีเบื้องต้น สร้างด้วย Python Flask containerize ด้วย Docker และ deploy บน Kubernetes ผ่าน Jenkins pipeline แบบอัตโนมัติ พร้อมระบบ Monitoring ด้วย Prometheus และ Grafana
 
