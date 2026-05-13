@@ -31,6 +31,7 @@ resource "google_sql_database_instance" "main" {
   deletion_protection = false
 }
 
+
 resource "google_sql_database" "database" {
   name     = "it_repair"
   instance = google_sql_database_instance.main.name

@@ -3,10 +3,11 @@ kind: Service
 metadata:
   name: it-repair-api-svc
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: it-repair-api
   ports:
     - port: 80
       targetPort: 80
-      nodePort: 30080
+      protocol: TCP
+      name: http

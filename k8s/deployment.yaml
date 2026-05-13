@@ -17,11 +17,13 @@ spec:
       containers:
       - name: it-repair-api
         # ใช้ image ที่ build จาก local
-        image: it-repair-api:latest
-        imagePullPolicy: IfNotPresent
+        image: yaichakkarin/it-repair-api:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         env:
+        - name: FORCE_UPDATE
+          value: "placeholder"
         # !!! แก้ IP ฐานข้อมูลด้านล่าง !!!
         - name: DB_HOST
           value: "34.158.49.62" 
