@@ -132,9 +132,10 @@ pipeline {
                         gcloud auth activate-service-account \
                           --key-file=$GOOGLE_APPLICATION_CREDENTIALS
                         '''
-                        
+                        sh "gcloud config set project it-repair-b6643577"
                         sh '''
-                        gcloud container clusters get-credentials my-cluster --region asia-southeast1 --project it-repair-b6643577
+                        gcloud container clusters get-credentials my-cluster \
+                          --zone asia-southeast1
                         '''
 
                         sh "sed -i 's|image: yaichakkarin/it-repair-api:.*|image: yaichakkarin/it-repair-api:${BUILD_NUMBER}|' k8s/deployment.yaml"
