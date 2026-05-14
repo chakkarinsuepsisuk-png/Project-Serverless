@@ -33,3 +33,5 @@ spec:
           value: "SuperSecretPassword123!"
         - name: DB_NAME
           value: "it_repair"
+        - name: UPDATE_VERSION
+          value: "v1.1"
