@@ -201,7 +201,7 @@ terraform init      # ดาวน์โหลด provider plugins
 terraform plan      # ตรวจสอบว่าจะสร้างอะไรบ้าง
 terraform apply     # สร้าง resource จริง
 ```
-> **สิ่งที่ Terraform สร้าง:** Cloud SQL instance ชื่อ `it-repair-db-fast` (MySQL 7.0, tier: db-f1-micro) บน GCP project `it-repair-b6643577` region `asia-southeast1` พร้อมสร้าง database ชื่อ `it_repair` และ user `root`
+> **สิ่งที่ Terraform สร้าง:** Cloud SQL instance ชื่อ `it-repair-db-fast` (MySQL 8.0, tier: db-f1-micro) บน GCP project `it-repair-b6643577` region `asia-southeast1` พร้อมสร้าง database ชื่อ `it_repair` และ user `root`
 
 ### Ansible — Verify Environment
 ```bash
